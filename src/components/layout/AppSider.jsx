@@ -1,50 +1,16 @@
-import { Layout, Card, Statistic, List, Typography, Spin } from 'antd';
-import { useState, useEffect } from 'react';
+import { Layout, Card, Statistic, List, Typography, Tag } from 'antd';
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import { fakeFetchCrypto, fetchAssets } from '../../api';
-import { percentDifference } from '../../utils';
+import { capitalize } from '../../utils';
+import { useContext } from 'react';
+import CryptoContext from '../../context/crypto-context';
 
 
 const siderStyle = {
     padding: '1rem',
 }
 
-
 export default function AppSider() {
-    const [loading, setLoading] = useState(false);
-    const [crypto, setCrypto] = useState([]);
-    const [assets, setAssets] = useState([]);
-
-
-    useEffect(() => {
-        async function preload() {
-            setLoading(true);
-            const { result } = await fakeFetchCrypto();
-            const assets = await fetchAssets();
-
-
-            setCrypto(result);
-            setAssets(assets.map(asset => {
-                const coin = result.find(coin => coin.id === asset.id);
-
-                return {
-                    grow: asset.price < coin.price,
-                    growPercent: percentDifference(asset.price, coin.price),
-                    totalAmount: asset.amount * coin.price,
-                    totalProfit: asset.amount * coin.price - asset.amount * asset.price,
-                    ...asset,
-                }
-            }));
-            setLoading(false);
-
-        }
-        preload();
-    }, [])
-
-
-    if (loading) {
-        return <Spin fullscreen />;
-    }
+    const { assets } = useContext(CryptoContext);
 
 
     return (
@@ -52,7 +18,7 @@ export default function AppSider() {
             {assets.map(asset => (
                 <Card style={{ marginBottom: '1rem' }} key={asset.id}>
                     <Statistic
-                        title={asset.id}
+                        title={capitalize(asset.id)}
                         value={asset.totalAmount}
                         precision={2}
                         valueStyle={{ color: asset.grow ? '#3f8600' : '#cf1322' }}
@@ -63,29 +29,26 @@ export default function AppSider() {
                         size="small"
                         bordered
                         dataSource={[
-                            { title: 'Total Profit', value: asset.totalProfit },
-                            { title: 'Asset Amount', value: asset.amount },
-                            { title: 'Difference', value: asset.growPercent },
+                            { title: 'Total Profit', value: asset.totalProfit, withTag: true },
+                            { title: 'Asset Amount', value: asset.amount, isPlain: true },
+                            //{ title: 'Difference', value: asset.growPercent },
                         ]}
                         renderItem={(item) => (
                             <List.Item>
                                 <span>{item.title}</span>
-                                <span>{item.value}</span>
+
+                                <span>
+                                    {item.withTag && <Tag color={asset.grow ? 'green' : 'red'}>{asset.growPercent}%</Tag>}
+                                    {item.isPlain && item.value.toFixed(2)}
+                                    {!item.isPlain && <Typography.Text type={asset.grow ? 'success' : 'danger'}>
+                                        {item.value.toFixed(2)}$
+                                    </Typography.Text>}
+                                </span>
                             </List.Item>
                         )}
                     />
                 </Card>
             ))}
-            {/* <Card>
-                <Statistic
-                    title="Idle"
-                    value={9.3}
-                    precision={2}
-                    valueStyle={{ color: '#cf1322' }}
-                    prefix={<ArrowDownOutlined />}
-                    suffix="%"
-                />
-            </Card> */}
         </Layout.Sider>
     )
 }
