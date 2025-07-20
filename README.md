@@ -28,8 +28,3 @@ This project is a simple cryptocurrency portfolio tracker built with React and V
 - `src/context/crypto-context.jsx` – React context for managing crypto data and assets.
 - `src/data.js` – Mock data for cryptocurrencies and user assets.
 - `src/api.js` – Simulated API calls for fetching crypto data and assets.
-
-## Credits
-
-This project was created by following the tutorial:  
-[React Crypto App - Full Course](https://www.youtube.com/watch?v=S4HOy6yTclU&t=8367s)
